@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { TablaComponent } from './components/tabla/tabla.component';
+import { TablaLayoutComponent } from './components/tabla-layout/tabla-layout.component';
 
 export const routes: Routes = [
     {
@@ -8,7 +8,12 @@ export const routes: Routes = [
         pathMatch: 'full'
     },
     {
+        path:'**',
+        redirectTo: 'tabla',
+        pathMatch: 'full'
+    },
+    {
         path:'tabla',
-        component: TablaComponent
+        component: TablaLayoutComponent
     }
 ];

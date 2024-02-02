@@ -1,38 +1,73 @@
-import { AfterViewInit, Component, ViewChild, inject } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  OnDestroy,
+  ViewChild,
+  inject,
+} from '@angular/core';
 import { MatTableModule, MatTable } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { TablaDataSource } from './tabla-datasource';
 import { IPersona } from '../../core/models/persona.model';
-import { startWith, switchMap, map, catchError, of, merge, Observable } from 'rxjs';
+import {
+  startWith,
+  switchMap,
+  map,
+  catchError,
+  of,
+  merge,
+  Observable,
+  Subject,
+  takeUntil,
+} from 'rxjs';
 import { PersonaService } from '../../core/services/persona.service';
 import { MatIconAnchor, MatIconButton } from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
+import { PersonaFormComponent } from '../persona-form/persona-form.component';
+import { EliminarPersonaComponent } from '../eliminar-persona/eliminar-persona.component';
+import { VerPersonaComponent } from '../ver-persona/ver-persona.component';
 
 @Component({
   selector: 'app-tabla',
   templateUrl: './tabla.component.html',
   styleUrl: './tabla.component.scss',
   standalone: true,
-  imports: [MatTableModule, MatPaginatorModule, MatSortModule, MatIconButton, MatIconAnchor, MatIconModule]
+  imports: [
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatIconButton,
+    MatIconAnchor,
+    MatIconModule,
+    PersonaFormComponent,
+    EliminarPersonaComponent,
+  ],
 })
-export class TablaComponent implements AfterViewInit {
+export class TablaComponent implements AfterViewInit, OnDestroy {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatTable) table!: MatTable<IPersona>;
   @ViewChild(MatSort) sort!: MatSort;
 
+  private destroy = new Subject<void>();
   dataSource: TablaDataSource;
   displayedColumns = ['id', 'nombre', 'edad', 'email', 'acciones'];
 
-  private readonly personaService = inject(PersonaService)
+  private readonly personaService = inject(PersonaService);
+  private readonly dialog = inject(MatDialog);
 
   constructor() {
     this.dataSource = new TablaDataSource(this.personaService);
   }
 
+  ngOnDestroy(): void {
+    this.destroy.next();
+    this.destroy.complete();
+  }
 
   ngAfterViewInit(): void {
-    this.sort.sortChange.subscribe(() => (this.paginator.pageIndex = 0));
+    this.sort.sortChange.pipe(takeUntil(this.destroy)).subscribe(() => (this.paginator.pageIndex = 0));
     merge(this.sort.sortChange, this.paginator.page)
       .pipe(
         startWith({}),
@@ -43,7 +78,8 @@ export class TablaComponent implements AfterViewInit {
           );
           return this.dataSource.connect();
         }),
-        catchError(() => of([]))
+        catchError(() => of([])),
+        takeUntil(this.destroy)
       )
       .subscribe();
   }
@@ -54,26 +90,74 @@ export class TablaComponent implements AfterViewInit {
       this.paginator.pageSize
     );
   }
-  
 
   agregarPersona() {
-    // Método para manejar la acción de agregar una nueva persona.
-    // Aquí abrirías un diálogo (MatDialog) para crear una nueva persona.
+    const dialogRef = this.dialog.open(PersonaFormComponent, {
+      width: '50%',
+    });
+
+    dialogRef
+      .afterClosed()
+      .pipe(takeUntil(this.destroy))
+      .subscribe((result) => {
+        if (result) {
+          console.log('Persona agregada', result);
+          this.cargarPersonas();
+        }
+      });
   }
 
   verPersona(persona: IPersona) {
-    // Método para manejar la acción de visualizar detalles de una persona.
-    // Podrías abrir un diálogo con la información de la persona.
+    const dialogRef = this.dialog.open(VerPersonaComponent, {
+      data: { persona: persona },
+    });
+    
   }
 
   editarPersona(persona: IPersona) {
-    // Método para manejar la acción de editar una persona.
-    // Abrirías un diálogo (MatDialog) con un formulario para editar la persona.
+    const dialogRef = this.dialog.open(PersonaFormComponent, {
+      width: '50%',
+      data: { persona },
+    });
+
+    dialogRef
+      .afterClosed()
+      .pipe(takeUntil(this.destroy))
+      .subscribe((result) => {
+        if (result) {
+          console.log('Persona actualizada', result);
+          this.cargarPersonas();
+        }
+      });
   }
 
   eliminarPersona(persona: IPersona) {
-    // Método para manejar la acción de eliminar una persona.
-    // Podrías mostrar un diálogo de confirmación antes de eliminar.
-  }
+    const dialogRef = this.dialog.open(EliminarPersonaComponent, {
+      width: '50%',
+      data: { persona: persona },
+    });
 
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy)).subscribe((result) => {
+      if (result) {
+        this.personaService
+          .eliminarPersona(persona.id)
+          .pipe(takeUntil(this.destroy))
+          .subscribe({
+            next: () => {
+              console.log('Persona eliminada');
+              this.cargarPersonas();
+            },
+            error: (error) => {
+              console.error('Error al eliminar la persona', error);
+            },
+          });
+      }
+    });
+  }
+  cargarPersonas(): void {
+    this.dataSource.loadPersonas(
+      this.paginator.pageIndex,
+      this.paginator.pageSize
+    );
+  }
 }

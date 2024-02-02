@@ -70,7 +70,7 @@ export class PersonaService {
    * Actualiza los datos de una persona.
    * @param {number} id - El ID de la persona que se desea actualizar.
    * @param {IPersonaUpdateApi} persona - El objeto que contiene los datos de la persona a actualizar.
-   * @returns {Observable<any>} Un Observable que completa si la actualización es exitosa.
+   * @returns {Observable<IPersona>} Un Observable de tipo Persona es exitosa.
    * @example
    * const personaActualizada = { nombre: 'Nuevo Nombre', edad: 30, email: 'email@example.com' };
    * this.personaService.actualizarPersona(1, personaActualizada).subscribe({
@@ -78,12 +78,15 @@ export class PersonaService {
    *   error: (error) => console.error(error)
    * });
    */
-  actualizarPersona(id: number, persona: IPersonaUpdateApi): Observable<any> {
+  actualizarPersona(
+    id: number,
+    persona: IPersonaUpdateApi
+  ): Observable<IPersona> {
     let apiUrl = 'https://localhost:7144/persona';
-    return this.http.put(`${apiUrl}/${id}`, persona).pipe(
+    return this.http.put<IPersona>(`${apiUrl}/${id}`, persona).pipe(
       catchError((error) => {
         console.error('Error al actualizar la persona:', error);
-        return of(null);
+        return throwError(() => new Error('Error al actualizar la persona'));
       })
     );
   }
@@ -110,7 +113,6 @@ export class PersonaService {
     );
   }
 
-
   /**
    * Obtiene una persona por su ID.
    * @param {number} id - El ID de la persona que se desea obtener.
@@ -124,14 +126,32 @@ export class PersonaService {
   getPersonaPorId(id: number): Observable<IPersonaApi> {
     let apiUrl = 'https://localhost:7144/persona';
     return this.http.get<IPersonaApi>(`${apiUrl}/${id}`).pipe(
-      catchError(error => {
+      catchError((error) => {
         console.error('Error al obtener la persona:', error);
         return throwError(() => new Error('Error al obtener la persona'));
       })
     );
   }
 
-
+  /**
+   * Elimina una persona por su ID.
+   * @param {number} id - El ID de la persona que se desea eliminar.
+   * @returns {Observable<any>} Un Observable que completa si la eliminación es exitosa.
+   * @example
+   * this.personaService.eliminarPersona(1).subscribe({
+   *   next: () => console.log('Eliminación exitosa'),
+   *   error: (error) => console.error(error)
+   * });
+   */
+  eliminarPersona(id: number): Observable<any> {
+    let apiUrl = 'https://localhost:7144/persona';
+    return this.http.delete(`${apiUrl}/${id}`).pipe(
+      catchError((error) => {
+        console.error('Error al eliminar la persona:', error);
+        return throwError(() => new Error('Error al eliminar la persona'));
+      })
+    );
+  }
 
   private adaptarAPersonaPaginada(
     apiResponse: IPersonasPaginadaApi

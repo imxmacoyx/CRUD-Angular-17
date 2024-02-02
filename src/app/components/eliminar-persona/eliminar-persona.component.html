@@ -1,0 +1,5 @@
+<h1 mat-dialog-title> ¿Estás seguro de que deseas eliminar a {{ data.persona.nombre }} con el correo {{ data.persona.email }}?</h1>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onDismiss()">Cancelar</button>
+  <button mat-button color="warn" (click)="onConfirm()">Eliminar</button>
+</mat-dialog-actions>

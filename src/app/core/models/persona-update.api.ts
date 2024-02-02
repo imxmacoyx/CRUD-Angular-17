@@ -1,6 +1,6 @@
 export interface IPersonaUpdateApi {
-    nombre?: string;
-    edad?: number;
-    email?: string;
+    nombre: string;
+    edad: number;
+    email: string;
 }
   

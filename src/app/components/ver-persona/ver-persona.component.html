@@ -1,0 +1,46 @@
+@if (!loading){
+<mat-card class="example-card">
+    <mat-card-header>
+        <div mat-card-avatar class="example-header-image"></div>
+        <mat-card-title class="text-white">{{ personaSeleccionada.nombre}}</mat-card-title>
+        <mat-card-subtitle> {{personaSeleccionada.email}}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+        <p>Más detalles:</p>
+        <ul>
+            <li>
+                id: {{personaSeleccionada.id}}
+            </li>
+            <li>
+                Creado: {{personaSeleccionada.createdAt | date: 'dd/MM/yyyy' }}
+            </li>
+            <li>
+                Actualizado: {{personaSeleccionada.updatedAt | date: 'dd/MM/yyyy' }}
+            </li>
+        </ul>
+    </mat-card-content>
+    <div class="d-flex align-items-center justify-content-center">
+        <mat-card-actions class="d-flex align-items-center">
+            <button mat-button (click)="onDismiss()">Cerrar</button>
+        </mat-card-actions>
+    </div>
+</mat-card>
+
+} @else {
+
+<mat-card class="example-card">
+    <mat-card-header>
+        <div mat-card-avatar class="example-header-image"></div>
+        <mat-card-title class="skeleton title"></mat-card-title>
+        <mat-card-subtitle class="skeleton subtitle"></mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+        <p>Más detalles:</p>
+        <ul>
+            <div class="skeleton content"></div>
+            <div class="skeleton content"></div>
+            <div class="skeleton content"></div>
+        </ul>
+    </mat-card-content>
+</mat-card>
+}

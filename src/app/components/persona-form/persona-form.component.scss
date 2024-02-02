@@ -1,0 +1,40 @@
+// En persona-form.component.scss
+.full-width {
+  width: 100%;
+}
+
+.shipping-card {
+  max-width: calc(100% - 40px); 
+  margin: 20px auto;
+  box-shadow: none; 
+}
+
+.mat-form-field {
+  width: 100%; 
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 16px; 
+}
+
+.col {
+  padding: 0 8px;
+}
+
+.col:last-child {
+  margin-right: 0;
+}
+
+.mat-card-title {
+  color: #000; 
+}
+
+.mat-card-content {
+  color: rgba(0, 0, 0, 0.87); 
+}
+
+.mat-error {
+  color: #f44336; 
+}

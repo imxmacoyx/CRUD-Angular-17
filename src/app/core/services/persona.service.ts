@@ -162,7 +162,7 @@ export class PersonaService {
       pageSize: apiResponse.pageSize,
       totalPages: apiResponse.totalPages,
       data: apiResponse.data
-        .filter((persona) => !persona.eliminado)
+        // .filter((persona) => !persona.eliminado)
         .map(this.adaptarAPersona),
     };
   }

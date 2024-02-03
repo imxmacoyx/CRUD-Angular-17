@@ -99,7 +99,7 @@ export class PersonaFormComponent {
     }
 
     const edad = Number(valor);
-    if (edad < 0 || edad > 150) {
+    if (edad < 0 || edad > 120) {
       return { edadFueraDeRango: true };
     }
     return null;

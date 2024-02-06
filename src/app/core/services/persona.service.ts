@@ -1,18 +1,22 @@
-import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, map, of, retry, throwError } from 'rxjs';
-import { IPersona } from '../models/persona.model';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { IPersonasPaginada } from '../models/personas-paginadas.model';
-import { IPersonasPaginadaApi } from '../models/personas-paginadas.api';
-import { IPersonaApi } from '../models/persona.api';
-import { IPersonaUpdateApi } from '../models/persona-update.api';
+import { Injectable, inject } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { Observable, catchError, map, of, retry, throwError } from 'rxjs';
 import { IPersonaCreationApi } from '../models/persona-creation.api';
+import { IPersonaUpdateApi } from '../models/persona-update.api';
+import { IPersonaApi } from '../models/persona.api';
+import { IPersona } from '../models/persona.model';
+import { IPersonasPaginadaApi } from '../models/personas-paginadas.api';
+import { IPersonasPaginada } from '../models/personas-paginadas.model';
+import { ErrorModalComponent } from '../../shared/components/error-modal/error-modal.component';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PersonaService {
+
   private readonly http = inject(HttpClient);
+  private readonly dialog = inject(MatDialog);
 
   /**
    * Obtiene todas las personas.
@@ -85,7 +89,17 @@ export class PersonaService {
     let apiUrl = 'https://localhost:7144/persona';
     return this.http.put<IPersona>(`${apiUrl}/${id}`, persona).pipe(
       catchError((error) => {
-        console.error('Error al actualizar la persona:', error);
+        let errorMessage = 'Ocurrió un error desconocido';
+        let errorCode = error.status || 'Desconocido';
+        if (error.error && error.error.error) {
+          errorMessage = error.error.error;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        this.dialog.open(ErrorModalComponent, {
+          data: `${errorMessage}`,
+          width: '50%',
+        });      
         return throwError(() => new Error('Error al actualizar la persona'));
       })
     );
@@ -107,7 +121,17 @@ export class PersonaService {
     return this.http.post<IPersonaApi>(apiUrl, persona).pipe(
       map((apiPersona) => this.adaptarAPersona(apiPersona)),
       catchError((error) => {
-        console.error('Error al crear la persona:', error);
+        let errorMessage = 'Ocurrió un error desconocido';
+        let errorCode = error.status || 'Desconocido';
+        if (error.error && error.error.error) {
+          errorMessage = error.error.error;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        this.dialog.open(ErrorModalComponent, {
+          data: `${errorMessage}`,
+          width: '50%',
+        });      
         return throwError(() => new Error('Error al crear la persona'));
       })
     );
